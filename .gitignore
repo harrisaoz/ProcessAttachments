@@ -1,2 +1,3 @@
-./ProcessAttachments/obj
-./ProcessAttachments/bin
+ProcessAttachments/obj
+ProcessAttachments/bin
+.vs/
