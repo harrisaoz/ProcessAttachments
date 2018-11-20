@@ -12,7 +12,7 @@ namespace ProcessAttachments
 {
     class TimesheetProcessor
     {
-        private static readonly string TARGET_RECIPIENT = "timesheets@vibeteaching.co.uk";
+        //private static readonly string TARGET_RECIPIENT = "timesheets@vibeteaching.co.uk";
         private readonly string hostname;
         private readonly string targetDir;
         private readonly string username;
