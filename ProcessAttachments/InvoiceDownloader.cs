@@ -18,19 +18,19 @@ namespace ProcessAttachments
         string username = "";
         string password = "";
         string imapHostname = "";
-        string[] folders = null;
+        string sourceFolderName = "";
 
-        public static void execute(string[] args)
+        public static void execute(ImapSettings imapSettings, FileExportSettings fileExportSettings)
         {
             try
             {
-                string hostname = args[0];
-                string baseDir = args[1];
-                string user = args[2];
-                string pass = args[3];
-                string[] folders = args.Skip(4).ToArray();
+                string hostname = imapSettings.Hostname;
+                string baseDir = fileExportSettings.ExportDirectory;
+                string user = imapSettings.Username;
+                string pass = imapSettings.Password;
+                string folder = imapSettings.SourceFolder;
 
-                var downloader = new InvoiceDownloader(hostname, baseDir, user, pass, folders);
+                var downloader = new InvoiceDownloader(hostname, baseDir, user, pass, folder);
                 downloader.run();
             }
             catch (Exception e)
@@ -40,13 +40,13 @@ namespace ProcessAttachments
                 return;
             }
         }
-        public InvoiceDownloader(string imapHostname, string baseDirectory, string username, string password, string[] folders)
+        public InvoiceDownloader(string imapHostname, string baseDirectory, string username, string password, string folder)
         {
             this.imapHostname = imapHostname;
             this.baseDirectory = baseDirectory;
             this.username = username;
             this.password = password;
-            this.folders = folders;
+            this.sourceFolderName = folder;
         }
 
         public void run()
@@ -94,11 +94,11 @@ namespace ProcessAttachments
 
             var topFolder = client.GetFolder(client.PersonalNamespaces[0]);
 
-            Console.WriteLine("Filtering folders against list: {0}", folders);
+            Console.WriteLine("Filtering folders against list: {0}", sourceFolderName);
             foreach (var folder in topFolder.GetSubfolders(false))
             {
                 Console.WriteLine("Checking folder {0}", folder.Name);
-                if (Array.Exists<string>(folders, name => name.ToUpper().Equals(folder.Name.ToUpper())))
+                if (this.sourceFolderName.ToUpper().Equals(folder.Name.ToUpper()))
                 {
                     Console.WriteLine("Found matching folder: {0}", folder.Name);
                     yield return folder;

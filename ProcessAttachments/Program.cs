@@ -12,7 +12,14 @@ namespace ProcessAttachments
             var imapSettings = config.GetSection("imapSettings") as ImapSettings;
             var fileExportSettings = config.GetSection("fileExportSettings") as FileExportSettings;
 
-            TimesheetProcessor.execute(imapSettings, fileExportSettings);
+            if (args[0].Equals("invoices"))
+            {
+                InvoiceDownloader.execute(imapSettings, fileExportSettings);
+            }
+            else
+            {
+                TimesheetProcessor.execute(imapSettings, fileExportSettings);
+            }
         }
 
         static void config()
