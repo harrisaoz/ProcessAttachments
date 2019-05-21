@@ -1,3 +1,4 @@
-ProcessAttachments/obj
-ProcessAttachments/bin
+*/obj
+*/bin
 .vs/
+.idea/
