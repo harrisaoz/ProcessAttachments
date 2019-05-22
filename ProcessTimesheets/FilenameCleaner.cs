@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace ProcessAttachments
+namespace ProcessTimesheets
 {
     static class FilenameCleaner
     {

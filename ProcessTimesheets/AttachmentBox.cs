@@ -1,23 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 using System.Linq;
 
 using MailKit;
 
-namespace ProcessAttachments
+namespace ProcessTimesheets
 {
-
     class AttachmentBox
     {
-        private BodyPartMultipart top;
+        private readonly BodyPartMultipart top;
         public readonly List<BodyPartBasic> attachmentList;
 
         public AttachmentBox(BodyPartMultipart multipart)
         {
-            this.top = multipart;
-            this.attachmentList = new List<BodyPartBasic>();
+            top = multipart;
+            attachmentList = new List<BodyPartBasic>();
         }
 
         public void fill()

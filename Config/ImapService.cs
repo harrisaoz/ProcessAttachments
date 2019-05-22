@@ -11,10 +11,10 @@ namespace Config
             set { this["hostname"] = value; }
         }
 
-        [ConfigurationProperty("port", IsRequired = false, DefaultValue = (uint)993)]
-        public uint Port
+        [ConfigurationProperty("port", IsRequired = false, DefaultValue = 993)]
+        public int Port
         {
-            get { return (uint)this["port"]; }
+            get { return (int)this["port"]; }
             set { this["port"] = value; }
         }
     }

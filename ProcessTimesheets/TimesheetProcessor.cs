@@ -2,41 +2,52 @@
 using System.Linq;
 using System.Collections.Generic;
 
-using MailKit.Net.Imap;
 using MailKit.Search;
 using MailKit;
 using MimeKit;
 using System.IO;
 
-namespace ProcessAttachments
+using Config;
+using ImapAttachmentProcessing;
+
+namespace ProcessTimesheets
 {
     class TimesheetProcessor
     {
+        private readonly SimpleImapService imapService;
         //private static readonly string TARGET_RECIPIENT = "timesheets@vibeteaching.co.uk";
-        private readonly string hostname;
         private readonly string targetDir;
-        private readonly string username;
-        private readonly string password;
         private readonly string sourceFolderName;
         private readonly string processedFolderName;
         private readonly string attentionFolderName;
-        private ImapClient client;
 
-        public static void execute(ImapSettings imapSettings, FileExportSettings fileExportSettings)
+        static void Main(string[] args)
+        {
+            var configLoader = new ConfigLoader();
+
+            execute(configLoader.imapServiceSettings(),
+                configLoader.imapFolderSettings(),
+                configLoader.credentialsSettings(),
+                configLoader.fileSystemExportSettings());
+        }
+
+        public static void execute(
+            ImapService imapService,
+            ImapFolders imapFolders,
+            Credentials credentials,
+            FileSystemExport fileSystemExport)
         {
             try
             {
-                string hostname = imapSettings.Hostname;
-                string downloadDir = fileExportSettings.ExportDirectory;
-                string user = imapSettings.Username;
-                string pass = imapSettings.Password;
-                string sourceFolder = imapSettings.SourceFolder;
-                string processedFolder = imapSettings.ProcessedFolder;
-                string attentionFolder = imapSettings.AttentionFolder;
+                string downloadDir = fileSystemExport.ExportDirectory;
+                string sourceFolder = imapFolders.SourceFolder;
+                string processedFolder = imapFolders.ProcessedFolder;
+                string attentionFolder = imapFolders.AttentionFolder;
 
-                var processor = new TimesheetProcessor(hostname, downloadDir, user, pass,
+                var processor = new TimesheetProcessor(imapService, credentials,
+                    downloadDir,
                     sourceFolder, processedFolder, attentionFolder);
-                processor.run();
+                processor.Run();
             }
             catch (Exception e)
             {
@@ -46,40 +57,27 @@ namespace ProcessAttachments
             }
         }
 
-        TimesheetProcessor(string hostname, string targetDir, string username, string password,
+        TimesheetProcessor(ImapService serviceConfig, Credentials credentials,
+            string targetDir,
             string sourceFolder, string processedFolder, string attentionFolder)
         {
-            this.client = new ImapClient();
-            this.hostname = hostname;
+            imapService = new SimpleImapService(serviceConfig, credentials);
             this.targetDir = targetDir;
-            this.username = username;
-            this.password = password;
-            this.sourceFolderName = sourceFolder;
-            this.processedFolderName = processedFolder;
-            this.attentionFolderName = attentionFolder;
-        }
-
-        void connect()
-        {
-            Console.WriteLine("Opening mailbox");
-            client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-            client.Connect(hostname, 993, true);
-            client.Authenticate(username, password);
+            sourceFolderName = sourceFolder;
+            processedFolderName = processedFolder;
+            attentionFolderName = attentionFolder;
         }
 
         Func<IMailFolder, IMailFolder, IMailFolder, Action<List<UniqueId>, List<UniqueId>>> onCompletion =
             (sourceFolder, processedFolder, attentionFolder) =>
             (List<UniqueId> processed, List<UniqueId> requireAttention) =>
             {
-                foreach (var uid in processed)
-                {
-                    Console.WriteLine("{0} processed", uid);
-                }
+                processed.ForEach(
+                    uid => Console.WriteLine("{0} processed", uid)
+                );
 
-                foreach (var uid in requireAttention)
-                {
-                    Console.WriteLine("{0} requires attention", uid);
-                }
+                requireAttention.ForEach(
+                    uid => Console.WriteLine("{0} requires attention", uid));
 
                 sourceFolder.Close();
                 sourceFolder.Open(FolderAccess.ReadWrite);
@@ -87,16 +85,18 @@ namespace ProcessAttachments
                 sourceFolder.MoveTo(requireAttention, attentionFolder);
             };
 
-        public void run()
+        public void Run()
         {
             try
             {
-                Console.WriteLine("Creating client");
-                connect();
+                var client = imapService.client;
 
-                IMailFolder sourceFolder = client.GetFolder(this.sourceFolderName);
-                var processedFolder = client.GetFolder(this.processedFolderName);
-                var attentionFolder = client.GetFolder(this.attentionFolderName);
+                Console.WriteLine("Creating client");
+                imapService.Connect();
+
+                IMailFolder sourceFolder = client.GetFolder(sourceFolderName);
+                var processedFolder = client.GetFolder(processedFolderName);
+                var attentionFolder = client.GetFolder(attentionFolderName);
                 sourceFolder.Open(FolderAccess.ReadOnly);
 
                 //TextSearchQuery query = SearchQuery.ToContains(TARGET_RECIPIENT);
@@ -136,16 +136,7 @@ namespace ProcessAttachments
             }
             finally
             {
-                try
-                {
-                    client.Disconnect(true);
-                    client.Dispose();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Unexpected failure to disconnect the imap client. {0}", e);
-                    //ignore, we just want to clean up.
-                }
+                imapService.Disconnect();
             }
 
             Console.WriteLine("Program terminating normally.");
@@ -184,7 +175,7 @@ namespace ProcessAttachments
 
         private string filenameFromSummary(IMessageSummary summary)
         {
-            return String.Format("{0}_{1}",
+            return string.Format("{0}_{1}",
                     summary.InternalDate.Value.ToString("yyyy-MM-ddTHHmmss"),
                     summary
                         .Envelope
@@ -231,7 +222,7 @@ namespace ProcessAttachments
 
         private bool isFileDownloaded(MimePart part, string filenameBase)
         {
-            string relName = String.Format("{0}__{1}",
+            string relName = string.Format("{0}__{1}",
                 filenameBase,
                 FilenameCleaner.cleanFilename(part.FileName));
             string absName = Path.Combine(targetDir, relName);
@@ -244,12 +235,12 @@ namespace ProcessAttachments
                 Console.Write("+");
                 return true;
             }
-            catch (System.NullReferenceException nre)
+            catch (NullReferenceException nre)
             {
                 Console.WriteLine("-");
                 Console.WriteLine("Failed to write attachment to file. absName = {3}, stream = {0}, part = {1}. {2}", stream, part.Content, nre, absName);
             }
-            catch (System.NotSupportedException nse)
+            catch (NotSupportedException nse)
             {
                 Console.WriteLine("-");
                 Console.WriteLine("The specified filename ({0}) is not valid on this filesystem. {1}", absName, nse);
@@ -285,11 +276,11 @@ namespace ProcessAttachments
 
         private bool isIgnorableAttachment(ContentType contentType, string name)
         {
-            return contentType != null && ((
+            return contentType != null && (
                 contentType.IsMimeType("text", "plain") && (name == null || name.EndsWith(".txt"))
-            ) || (
+             ||
                 contentType.IsMimeType("text", "html") && (name == null || name.Contains(".htm"))
-            ));
+            );
         }
 
         private static readonly ContentType[] okAttachmentTypes =
@@ -306,7 +297,7 @@ namespace ProcessAttachments
         {
             return okAttachmentTypes
                 .Aggregate(false, (acc, c) => acc ||
-                    (contentType != null && contentType.IsMimeType(c.MediaType, c.MediaSubtype)));
+                    contentType != null && contentType.IsMimeType(c.MediaType, c.MediaSubtype));
         }
     }
 }

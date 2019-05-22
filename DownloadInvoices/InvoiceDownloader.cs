@@ -8,29 +8,39 @@ using MailKit;
 using MimeKit;
 using System.IO;
 
-namespace ProcessAttachments
+using Config;
+using ImapAttachmentProcessing;
+
+namespace DownloadInvoices
 {
     class InvoiceDownloader
     {
-        ImapClient client;
-        // Required parameters
-        string baseDirectory = "";
-        string username = "";
-        string password = "";
-        string imapHostname = "";
-        string sourceFolderName = "";
+        readonly private SimpleImapService imapService;
+        readonly string baseDirectory;
+        readonly string sourceFolderName;
 
-        public static void execute(ImapSettings imapSettings, FileExportSettings fileExportSettings)
+        static void Main(string[] args)
+        {
+            var configLoader = new ConfigLoader();
+
+            execute(configLoader.imapServiceSettings(),
+                configLoader.imapFolderSettings(),
+                configLoader.credentialsSettings(),
+                configLoader.fileSystemExportSettings());
+        }
+
+        public static void execute(
+            ImapService imapService,
+            ImapFolders imapFolders,
+            Credentials credentials,
+            FileSystemExport fileSystemExport)
         {
             try
             {
-                string hostname = imapSettings.Hostname;
-                string baseDir = fileExportSettings.ExportDirectory;
-                string user = imapSettings.Username;
-                string pass = imapSettings.Password;
-                string folder = imapSettings.SourceFolder;
+                string baseDir = fileSystemExport.ExportDirectory;
+                string folder = imapFolders.SourceFolder;
 
-                var downloader = new InvoiceDownloader(hostname, baseDir, user, pass, folder);
+                var downloader = new InvoiceDownloader(imapService, credentials, baseDir, folder);
                 downloader.run();
             }
             catch (Exception e)
@@ -40,26 +50,27 @@ namespace ProcessAttachments
                 return;
             }
         }
-        public InvoiceDownloader(string imapHostname, string baseDirectory, string username, string password, string folder)
+
+        public InvoiceDownloader(
+            ImapService serviceConfig,
+            Credentials credentials,
+            string baseDirectory,
+            string folder)
         {
-            this.imapHostname = imapHostname;
             this.baseDirectory = baseDirectory;
-            this.username = username;
-            this.password = password;
-            this.sourceFolderName = folder;
+            this.imapService = new SimpleImapService(serviceConfig, credentials);
+            sourceFolderName = folder;
         }
 
         public void run()
         {
             try
             {
-                Console.WriteLine("Creating client");
-                client = new ImapClient();
-                ulong startingModSeq = 0L;
+                imapService.Connect();
 
-                foreach (var folder in openFolders(client))
+                foreach (var folder in openFolders(imapService.client))
                 {
-                    uint totalSize = traverseFolder(folder, 0, startingModSeq);
+                    uint totalSize = TraverseFolder(folder, 0);
                     Console.WriteLine("Total size of items with attachments: {0:N} bytes", totalSize);
                 }
             }
@@ -70,16 +81,7 @@ namespace ProcessAttachments
             }
             finally
             {
-                try
-                {
-                    client.Disconnect(true);
-                    client.Dispose();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Unexpected failure to disconnect the imap client. {0}", e);
-                    //ignore, we just want to clean up.
-                }
+                imapService.Disconnect();
             }
 
             Console.WriteLine("Program terminating normally.");
@@ -88,37 +90,25 @@ namespace ProcessAttachments
         IEnumerable<IMailFolder> openFolders(ImapClient client)
         {
             Console.WriteLine("Opening mailbox");
-            client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-            client.Connect(imapHostname, 993, true);
-            client.Authenticate(username, password);
 
             var topFolder = client.GetFolder(client.PersonalNamespaces[0]);
 
-            Console.WriteLine("Filtering folders against list: {0}", sourceFolderName);
-            foreach (var folder in topFolder.GetSubfolders(false))
-            {
-                Console.WriteLine("Checking folder {0}", folder.Name);
-                if (this.sourceFolderName.ToUpper().Equals(folder.Name.ToUpper()))
-                {
-                    Console.WriteLine("Found matching folder: {0}", folder.Name);
-                    yield return folder;
-                }
-            }
+            return imapService.FilterByName(topFolder, new[] { this.sourceFolderName });
         }
 
-        private uint traverseFolder(IMailFolder f0, uint visitedSize, ulong modSeq)
+        private uint TraverseFolder(IMailFolder f0, uint visitedSize)
         {
-            uint size = visitFolderAction(f0, modSeq);
+            uint size = VisitFolderAction(f0);
 
             foreach (var f1 in f0.GetSubfolders(false))
             {
-                size = traverseFolder(f1, size, modSeq);
+                size = TraverseFolder(f1, size);
             }
 
             return visitedSize + size;
         }
 
-        private uint visitFolderAction(IMailFolder folder, ulong modSeq)
+        private uint VisitFolderAction(IMailFolder folder)
         {
             uint folderSize = 0;
             try
@@ -162,7 +152,7 @@ namespace ProcessAttachments
         string makeDateLabel(IMessageSummary summary)
         {
             DateTimeOffset? maybeDate = summary.Envelope.Date;
-            return maybeDate.HasValue ? maybeDate.Value.ToString("yyyyMM") : String.Format("nodate-{0}", summary.UniqueId);
+            return maybeDate.HasValue ? maybeDate.Value.ToString("yyyyMM") : string.Format("nodate-{0}", summary.UniqueId);
         }
 
         uint visitMessageAction(IMailFolder folder, IMessageSummary summary)
@@ -193,7 +183,7 @@ namespace ProcessAttachments
                                     continue;
                                 }
 
-                                string invoiceLabel = String.Format("{0}_{1}_{2}", serviceLabel, dateLabel, filename);
+                                string invoiceLabel = string.Format("{0}_{1}_{2}", serviceLabel, dateLabel, filename);
 
                                 Console.WriteLine("{0}: [MIME type: {1}]", invoiceLabel, part.ContentType.MimeType);
 
@@ -207,12 +197,12 @@ namespace ProcessAttachments
                                     part.Content.DecodeTo(stream);
                                     Console.Write("-");
                                 }
-                                catch (System.NullReferenceException nre)
+                                catch (NullReferenceException nre)
                                 {
                                     Console.WriteLine();
                                     Console.WriteLine("Failed to write attachment to file. absName = {3}, stream = {0}, part = {1}. {2}", stream, part.Content, nre, absName);
                                 }
-                                catch (System.NotSupportedException nse)
+                                catch (NotSupportedException nse)
                                 {
                                     Console.WriteLine();
                                     Console.WriteLine("The specified filename ({0}) is not valid on this filesystem. {1}", absName, nse);
