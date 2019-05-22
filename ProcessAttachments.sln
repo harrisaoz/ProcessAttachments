@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DownloadInvoices", "Downloa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcessTimesheets", "ProcessTimesheets\ProcessTimesheets.csproj", "{A2CF1E31-64AC-4AED-9BAA-6DD6479EA24B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConfigGenerator", "ConfigGenerator\ConfigGenerator.csproj", "{83D05E47-A68E-43AF-8C09-23CE240E9C6D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -72,5 +74,17 @@ Global
 		{A2CF1E31-64AC-4AED-9BAA-6DD6479EA24B}.Release|x64.Build.0 = Release|x64
 		{A2CF1E31-64AC-4AED-9BAA-6DD6479EA24B}.Release|x86.ActiveCfg = Release|x64
 		{A2CF1E31-64AC-4AED-9BAA-6DD6479EA24B}.Release|x86.Build.0 = Release|x64
+		{83D05E47-A68E-43AF-8C09-23CE240E9C6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83D05E47-A68E-43AF-8C09-23CE240E9C6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83D05E47-A68E-43AF-8C09-23CE240E9C6D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{83D05E47-A68E-43AF-8C09-23CE240E9C6D}.Debug|x64.Build.0 = Debug|Any CPU
+		{83D05E47-A68E-43AF-8C09-23CE240E9C6D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{83D05E47-A68E-43AF-8C09-23CE240E9C6D}.Debug|x86.Build.0 = Debug|Any CPU
+		{83D05E47-A68E-43AF-8C09-23CE240E9C6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83D05E47-A68E-43AF-8C09-23CE240E9C6D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{83D05E47-A68E-43AF-8C09-23CE240E9C6D}.Release|x64.ActiveCfg = Release|Any CPU
+		{83D05E47-A68E-43AF-8C09-23CE240E9C6D}.Release|x64.Build.0 = Release|Any CPU
+		{83D05E47-A68E-43AF-8C09-23CE240E9C6D}.Release|x86.ActiveCfg = Release|Any CPU
+		{83D05E47-A68E-43AF-8C09-23CE240E9C6D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

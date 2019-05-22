@@ -1,6 +1,8 @@
 ﻿using System.Configuration;
 
-namespace Config
+using Config;
+
+namespace ConfigGenerator
 {
     class GenerateConfig
     {
