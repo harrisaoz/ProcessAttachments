@@ -1,12 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <RootNamespace>Config</RootNamespace>
     <Platforms>x64</Platforms>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <ApplicationIcon />
-    <OutputType>Exe</OutputType>
-    <StartupObject>Config.GenerateConfig</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0" />
