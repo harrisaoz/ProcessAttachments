@@ -30,7 +30,6 @@ namespace ImapAttachmentProcessing
         public AttachmentProcessorBuilder PermitAttachmentType(ContentType attachmentType)
         {
             attachmentTypes.Add(attachmentType);
-            WriteAttachmentList(attachmentTypes);
             return this;
         }
 
@@ -71,17 +70,8 @@ namespace ImapAttachmentProcessing
             return this;
         }
 
-        void WriteAttachmentList(IEnumerable<ContentType> attachmentTypes) {
-            Console.WriteLine("attachmentTypes = ({0})", String.Join(
-                ", ",
-                attachmentTypes.Select(t => t.ToString()))
-            );
-        }
-
         public AttachmentProcessor Build()
         {
-            Console.WriteLine("Building AttachmentProcessor");
-                
             return new AttachmentProcessor(
                 attachmentTypes,
                 fileNamer,
