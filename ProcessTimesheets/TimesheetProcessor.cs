@@ -22,15 +22,18 @@ namespace ProcessTimesheets
                 configLoader.imapFolderSettings().ProcessedFolder,
                 configLoader.imapFolderSettings().AttentionFolder,
                 new AttachmentProcessorBuilder()
-                    .PermitAttachmentTypes(CommonContentTypes.IMAGES)
-                    .PermitAttachmentTypes(CommonContentTypes.PDF)
+                    .PermitAttachmentType(CommonContentTypes.IMAGE_JPEG)
+                    .PermitAttachmentType(CommonContentTypes.IMAGE_PNG)
+                    .PermitAttachmentType(CommonContentTypes.IMAGE_TIFF)
+                    .PermitAttachmentType(CommonContentTypes.PDF_NORMAL)
+                    .PermitAttachmentType(CommonContentTypes.PDF_GENERAL)
                     .PermitAttachmentType(CommonContentTypes.WORD_DOC)
                     .IgnoringAttachments((contentType, fileName) => contentType != null && (
                         contentType.IsMimeType("text", "plain") && (fileName == null || fileName.EndsWith(".txt")) ||
                         contentType.IsMimeType("text", "html") && (fileName == null || fileName.Contains(".htm")))
                     )
+                    .NameDownloadsByPartAndSummary(FileNamers.PartAndSummaryBasedName)
                     .DownloadTo(configLoader.fileSystemExportSettings().ExportDirectory)
-                    .NameDownloadsBySummaryOnly(FileNamers.SummaryBasedName)
                     .UsingSearchQuery(
                         SearchQuery.DeliveredAfter(DateTime.Parse("2018-10-01"))
                     )

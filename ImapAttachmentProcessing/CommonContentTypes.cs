@@ -10,32 +10,16 @@ namespace ImapAttachmentProcessing
         }
 
         public readonly static ContentType
-            JPEG = ct("image", "jpeg"),
-            PNG = ct("image", "png"),
-            TIFF = ct("image", "tiff"),
+            IMAGE_JPEG = ct("image", "jpeg"),
+            IMAGE_PNG = ct("image", "png"),
+            IMAGE_TIFF = ct("image", "tiff"),
             WORD_DOC = ct(
                 "application",
                 "vnd.openxmlformats-officedocument.wordprocessingml.document"
                 ),
-            TXT = ct("text", "plain"),
-            HTML = ct("text", "html"),
+            TEXT_PLAIN = ct("text", "plain"),
+            TEXT_HTML = ct("text", "html"),
             PDF_NORMAL = ct("application", "pdf"),
             PDF_GENERAL = ct("application", "octet-stream");
-
-        public readonly static ContentType[]
-            IMAGES = {
-                JPEG,
-                PNG,
-                TIFF
-            },
-            PDF = {
-                PDF_NORMAL,
-                PDF_GENERAL
-            },
-            TEXT = {
-                TXT,
-                HTML
-            };
-
     }
 }

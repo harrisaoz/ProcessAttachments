@@ -30,12 +30,7 @@ namespace ImapAttachmentProcessing
         public AttachmentProcessorBuilder PermitAttachmentType(ContentType attachmentType)
         {
             attachmentTypes.Add(attachmentType);
-            return this;
-        }
-
-        public AttachmentProcessorBuilder PermitAttachmentTypes(IEnumerable<ContentType> extraAttachmentTypes)
-        {
-            this.attachmentTypes.Concat(extraAttachmentTypes);
+            WriteAttachmentList(attachmentTypes);
             return this;
         }
 
@@ -45,9 +40,10 @@ namespace ImapAttachmentProcessing
             return this;
         }
 
-        public AttachmentProcessorBuilder NameDownloadsBySummaryOnly(Func<IMessageSummary, string> fileNamer)
+        public AttachmentProcessorBuilder NameDownloadsByPartAndSummary(
+            Func<MimePart, Func<IMessageSummary, string>> fileNamer)
         {
-            this.fileNamer = folder => part => fileNamer;
+            this.fileNamer = folder => fileNamer;
             return this;
         }
 
@@ -75,10 +71,20 @@ namespace ImapAttachmentProcessing
             return this;
         }
 
+        void WriteAttachmentList(IEnumerable<ContentType> attachmentTypes) {
+            Console.WriteLine("attachmentTypes = ({0})", String.Join(
+                ", ",
+                attachmentTypes.Select(t => t.ToString()))
+            );
+        }
+
         public AttachmentProcessor Build()
         {
-            return new AttachmentProcessor(attachmentTypes,
-                FileNamers.FolderBasedName,
+            Console.WriteLine("Building AttachmentProcessor");
+                
+            return new AttachmentProcessor(
+                attachmentTypes,
+                fileNamer,
                 new AttachmentDownloader(downloadFolder),
                 isIgnorableAttachment,
                 searchQuery,

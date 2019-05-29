@@ -43,17 +43,19 @@ namespace ImapAttachmentProcessing
                 return relativeName;
             };
 
-        public static Func<IMessageSummary, string> SummaryBasedName = summary => string.Format(
-            "{0}_{1}",
-            summary.InternalDate.Value.ToString("yyyy-MM-ddTHHmmss"),
-            summary
-                .Envelope
-                .From
-                .Where(from => from is MailboxAddress)
-                .Select(from => (MailboxAddress)from)
-                .Select(from => from.Address)
-                .DefaultIfEmpty("unknown")
-                .First()
-        );
+        public static Func<MimePart, Func<IMessageSummary, string>> PartAndSummaryBasedName =
+            part => summary => string.Format(
+                "{0}_{1}__{2}",
+                summary.InternalDate.Value.ToString("yyyy-MM-ddTHHmmss"),
+                summary
+                    .Envelope
+                    .From
+                    .Where(from => from is MailboxAddress)
+                    .Select(from => (MailboxAddress)from)
+                    .Select(from => from.Address)
+                    .DefaultIfEmpty("unknown")
+                    .First(),
+                CleanFileName(part.FileName)
+            );
     }
 }

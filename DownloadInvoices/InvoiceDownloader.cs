@@ -19,13 +19,14 @@ namespace DownloadInvoices
                 configLoader.credentialsSettings(),
                 configLoader.imapFolderSettings().SourceFolder,
                 new AttachmentProcessorBuilder()
-                    .PermitAttachmentTypes(CommonContentTypes.PDF)
+                    .PermitAttachmentType(CommonContentTypes.PDF_NORMAL)
+                    .PermitAttachmentType(CommonContentTypes.PDF_GENERAL)
                     .IgnoringAttachments((contentType, fileName) => fileName
                         .Contains("detalhe") || fileName
                         .EndsWith(".zip")
                     )
-                    .DownloadTo(configLoader.fileSystemExportSettings().ExportDirectory)
                     .NameDownloadsByFolder(FileNamers.FolderBasedName)
+                    .DownloadTo(configLoader.fileSystemExportSettings().ExportDirectory)
                     .IncludeMessageHeaders(
                             MessageSummaryItems.UniqueId |
                             MessageSummaryItems.Envelope |
