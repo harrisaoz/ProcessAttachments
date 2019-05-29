@@ -42,17 +42,5 @@ namespace ImapAttachmentProcessing
                 Console.WriteLine("Unexpected failure to disconnect the imap client. {0}", e);
             }
         }
-
-        public IEnumerable<IMailFolder> FilterByName(IMailFolder topFolder, string[] matchList)
-        {
-            var upperMatchList = matchList.Select(m => m.ToUpper());
-
-            Console.WriteLine("Filtering folders against list: {0}", matchList);
-            return topFolder
-                .GetSubfolders(false)
-                .Where(folder => upperMatchList.Contains(folder.Name.ToUpper()));
-        }
     }
-
-
 }
