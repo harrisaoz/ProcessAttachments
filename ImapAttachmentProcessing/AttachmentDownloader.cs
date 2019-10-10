@@ -40,16 +40,16 @@ namespace ImapAttachmentProcessing
             catch (NullReferenceException nre)
             {
                 log("-");
-                logE("Failed to write attachment to file. (filename = {0}) {1}", nre);
+                logE("Failed to write attachment to file. (filename = {0}) {2}", nre);
             }
             catch (NotSupportedException nse)
             {
                 log("-");
-                logE("The specified filename ({0}) is not valid on this filesystem. {1}", nse);
+                logE("The specified filename ({0}) is not valid on this filesystem. {2}", nse);
             }
-            catch (IOException)
+            catch (IOException ioe)
             {
-                log("=");
+                log("="); // file already exists
             }
             finally
             {
