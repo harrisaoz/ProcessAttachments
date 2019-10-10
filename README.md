@@ -39,5 +39,5 @@ Configuration
 
 * Edit *project*.dll.config - on the target host - to configure the required
 parameters
-* Ensure that the project*.dll.config fileis in the same folder as the
+* Ensure that the project*.dll.config file is in the same folder as the
  *project*.exe file.
