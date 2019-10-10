@@ -47,7 +47,7 @@ namespace ImapAttachmentProcessing
                 log("-");
                 logE("The specified filename ({0}) is not valid on this filesystem. {2}", nse);
             }
-            catch (IOException ioe)
+            catch (IOException)
             {
                 log("="); // file already exists
             }
