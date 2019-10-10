@@ -11,6 +11,7 @@ namespace ImapAttachmentProcessing
 
         public readonly static ContentType
             IMAGE_JPEG = ct("image", "jpeg"),
+            IMAGE_JPG = ct("image", "jpg"), // not an official MIME type, but some (broken) software apparently uses this!
             IMAGE_PNG = ct("image", "png"),
             IMAGE_TIFF = ct("image", "tiff"),
             WORD_DOC = ct(

@@ -23,6 +23,7 @@ namespace ProcessTimesheets
                 configLoader.imapFolderSettings().AttentionFolder,
                 new AttachmentProcessorBuilder()
                     .PermitAttachmentType(CommonContentTypes.IMAGE_JPEG)
+                    .PermitAttachmentType(CommonContentTypes.IMAGE_JPG)
                     .PermitAttachmentType(CommonContentTypes.IMAGE_PNG)
                     .PermitAttachmentType(CommonContentTypes.IMAGE_TIFF)
                     .PermitAttachmentType(CommonContentTypes.PDF_NORMAL)
