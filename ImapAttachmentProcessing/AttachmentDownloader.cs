@@ -32,7 +32,7 @@ namespace ImapAttachmentProcessing
                 fileName);
             try
             {
-                stream = File.Open(absoluteFileName, FileMode.CreateNew);
+                stream = File.Open(absoluteFileName, FileMode.Create);
                 content.DecodeTo(stream);
                 log("+");
                 return SaveResult.Ok;
