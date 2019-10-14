@@ -46,11 +46,21 @@ such as ImapAttachmentProcessing* or ProcessTimesheets*.
 
 #### New Deployment
 
-To create a new deployment:
+Local deployment:
+
+```
+$psdrive = New-LocalSystemDrive -TargetHost localhost
+```
+
+Remote deployment:
 
 ```
 $psdrive = New-RemoteSystemDrive
+```
 
+All deployments (local/remote):
+
+```
 New-Deployment -PSDrive $psdrive `
   -ToolName (ProcessTimesheets|DownloadInvoices) -DeployTo <folder-name>
 ```
