@@ -70,7 +70,7 @@ namespace ImapAttachmentProcessing
             }
         }
 
-        public int VisitFolder(IMailFolder folder,
+        private int VisitFolder(IMailFolder folder,
             Action<List<UniqueId>, List<UniqueId>> onCompletion)
         {
             folder.Open(FolderAccess.ReadOnly);
@@ -98,11 +98,11 @@ namespace ImapAttachmentProcessing
             return processed.Count();
         }
 
-        public SaveResult saveEmailAttachments(IMailFolder folder, IMessageSummary summary)
+        private SaveResult saveEmailAttachments(IMailFolder folder, IMessageSummary summary)
         {
-            if (summary.Body is BodyPartMultipart)
+            if (summary.Body is BodyPartMultipart body)
             {
-                var attachmentBox = new AttachmentBox((BodyPartMultipart)summary.Body);
+                var attachmentBox = new AttachmentBox(body);
                 attachmentBox.fill();
 
                 var attachments = attachmentBox.attachmentList;

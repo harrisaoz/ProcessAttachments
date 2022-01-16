@@ -46,7 +46,7 @@ namespace DownloadInvoices
         private readonly AttachmentProcessor attachmentProcessor;
         private readonly MailFolderFinder mailFolderFinder;
 
-        public InvoiceDownloader(
+        private InvoiceDownloader(
             ImapService serviceConfig,
             Credentials credentials,
             string folder,

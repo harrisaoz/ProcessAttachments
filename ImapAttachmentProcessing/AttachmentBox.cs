@@ -26,9 +26,8 @@ namespace ImapAttachmentProcessing
         {
             attachmentList.AddRange(
                 part
-                .BodyParts
-                .Where(p => p is BodyPartBasic)
-                .Select(b => (BodyPartBasic)b)
+                    .BodyParts
+                    .OfType<BodyPartBasic>()
             );
 
             foreach (var mp in part.BodyParts.Where(p => p is BodyPartMultipart))

@@ -11,9 +11,9 @@ namespace ImapAttachmentProcessing
 {
     public class SimpleImapService
     {
-        readonly public ImapClient client;
-        readonly private ImapService serviceConfig;
-        readonly private Credentials credentials;
+        public readonly ImapClient client;
+        private readonly ImapService serviceConfig;
+        private readonly Credentials credentials;
 
         public SimpleImapService(ImapService imapService, Credentials credentials)
         {
